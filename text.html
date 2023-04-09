@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Tetris</title>
+
+	<style>
+		body {
+			height: 100%;
+			overflow: hidden;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="800" height="2000"></canvas>
+	<script>
+		const canvas = document.getElementById("canvas");
+
+		const ctx = canvas.getContext("2d");
+		ctx.fillStyle = "gray";
+
+		const borderWidth = 5;
+		const blockSize = 30;
+
+		for(x = 0; x < 12; x++) {
+			for(y = 0; y < 24; y++) {
+				ctx.fillRect(
+					borderWidth * x + blockSize * x,
+					borderWidth * y + blockSize * y,
+					blockSize, 
+					blockSize
+				);
+			}
+		}
+		ctx.fillStyle = "red";
+		ctx.fillRect( 0, 0, blockSize, blockSize);
+
+		var Ix = 0;
+		var Iy = 0;
+		const KeyArray = ["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp"];
+		const MoveArray = [[-1, 0], [1,0], [0, 1], [0, -1]];
+
+		window.addEventListener("keydown", e => {
+			for(i = 0; i < 4; i++) {
+				if(e.key == KeyArray[i]) {
+					ctx.fillStyle = "grey";
+					ctx.fillRect(
+						borderWidth * Ix + blockSize * Ix,
+						borderWidth * Iy + blockSize * Iy,
+						blockSize,
+						blockSize
+					)
+
+					Ix += MoveArray[i][0];
+					Iy += MoveArray[i][1];
+
+					ctx.fillStyle = "red";
+					ctx.fillRect(
+						borderWidth * Ix + blockSize * Ix,
+						borderWidth * Iy + blockSize * Iy,
+						blockSize, 
+						blockSize
+					)
+				}
+			}
+		});
+	</script>
+</body>
+</html>
