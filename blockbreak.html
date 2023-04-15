@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Blockbreak</title>
+
+	<style>
+		body {
+			height: 100%;
+			overflow: hidden;
+		}
+	</style>
+
+	<script>
+        class Ball {
+            constructor(x_pos, y_pos, r, speed, theta) {
+				this.x_pos=x_pos;
+				this.y_pos=y_pos;
+                this.r=r;
+                this.speed=speed;
+                this.theta=theta;
+            }
+            Get_x_pos() {
+                return this.x_pos;
+            }
+            Get_y_pos() {
+                return this.y_pos;
+            }
+            Get_r() {
+                return this.r;
+            }
+            Set_x_pos(x) {
+                this.x_pos=x;
+            }
+            Set_y_pos(y) {
+                this.y_pos=y;
+            }
+            Move_interval(interval_x, interval_y) {
+                
+                Clear_Ball(ctx, _Ball, _Ball.Get_x_pos(), _Ball.Get_y_pos());
+				_Ball.Set_x_pos(_Ball.Get_x_pos()+interval_x);
+                _Ball.Set_y_pos(_Ball.Get_y_pos()+interval_y);
+                Draw_Ball(ctx, _Ball, _Ball.Get_x_pos(), _Ball.Get_y_pos());
+
+            }
+        }
+
+		class Bar {
+			constructor(x_pos, y_pos, w, h){
+				this.x_pos=x_pos;
+				this.y_pos=y_pos;
+				this.w=w;
+				this.h=h;
+			}
+			Get_x_pos(){
+				return this.x_pos
+			}
+			Get_y_pos(){
+				return this.y_pos;
+			}
+			Get_w(){
+				return this.w;
+			}
+			Get_h(){
+				return this.h;
+			}
+			Set_x_pos(x){
+				this.x_pos=x;
+			}
+			Set_y_pos(y){
+				this.y_pos=y;
+			}
+            Move_interval(interval) {
+                Clear_Bar(ctx, _Bar, _Bar.Get_x_pos(), _Bar.Get_y_pos());
+				_Bar.Set_x_pos(_Bar.Get_x_pos()+interval);
+                Draw_Bar(ctx, _Bar, _Bar.Get_x_pos(), _Bar.Get_y_pos());
+            }
+		}
+        
+		function Draw_Blocks(Rect){
+			let w=40;
+        	let h=40;
+            let interval=10;
+            let init_x=(1920/2)-100;
+            let init_y=100;
+            let frame_w=1920;
+            let frame_h=1080;
+
+            ctx.strokeRect(0, 0, frame_w, frame_h);
+        
+            ctx.fillStyle="#662410";
+			
+			for(let i=0; i<10; i++){
+                for(let j=0; j<5; j++){
+                    
+                    let x=init_x+((interval + w)*j);
+                    let y=init_y+(interval + h)*i;
+                    
+                    Rect.fillRect(x, y, w, h);
+                }
+            }
+		}
+
+		function Draw_Bar(Rect,Bar, x ,y){
+            Rect.fillRect(x, y,Bar.Get_w(), Bar.Get_h());
+		}
+		function Clear_Bar(Rect,Bar, x ,y){
+            Rect.clearRect(x, y,Bar.Get_w(), Bar.Get_h());
+		}
+
+        function Draw_Ball(ctx, _Ball, x, y) {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.arc(x, y, _Ball.Get_r(), 0, 2 * Math.PI);
+            ctx.fillStyle = "black";
+            ctx.fill();
+        }
+        function Clear_Ball(ctx, _Ball, x, y) {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.arc(x, y, _Ball.Get_r(), 0, Math.PI*2, true);
+            ctx.fillStyle="red";
+            ctx.fill();
+            console.log(_Ball.Get_x_pos(), _Ball.Get_y_pos());
+              }
+
+	</script>
+</head>
+
+<body>
+    <canvas id="myCanvas" width="1920" height="1080"></canvas>
+    <script>
+        const canvas = document.getElementById("myCanvas");
+
+        const ctx = canvas.getContext("2d");
+
+		let _Bar = new Bar(960,800,70,10);
+		let _Ball = new Ball(960, 800-10, 7, 10, 30);
+
+
+        Draw_Blocks(ctx);
+
+        Draw_Bar(ctx, _Bar, _Bar.Get_x_pos(), _Bar.Get_y_pos());
+        Draw_Ball(ctx, _Ball, _Ball.Get_x_pos(), _Ball.Get_y_pos());
+
+		window.addEventListener("keydown" , (e) => {
+				if(e.key == "ArrowRight"){
+                    _Bar.Move_interval(10);
+				}
+				if(e.key == "ArrowLeft"){
+                    _Bar.Move_interval(-10);
+				}
+		});
+
+        let timer=setInterval(function() { _Ball.Move_interval(10, 0) }, 100);
+        
+    </script>
+</body>
+</html>
