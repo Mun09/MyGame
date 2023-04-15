@@ -117,12 +117,24 @@
         }
         function Clear_Ball(ctx, _Ball, x, y) {
             ctx.globalCompositeOperation = 'destination-out';
-            ctx.arc(x, y, _Ball.Get_r(), 0, Math.PI*2, true);
+            ctx.arc(x, y, _Ball.Get_r(), 0, Math.PI * 2, true);
             ctx.fillStyle="red";
             ctx.fill();
-            console.log(_Ball.Get_x_pos(), _Ball.Get_y_pos());
-              }
+        }
+        function Clear(ctx){
+            ctx.clearRect(0, 0, 1920, 1080);
+        }
 
+        function Update(ctx,_Bar,_Ball){
+            Clear(ctx);
+            
+            Draw_Blocks(ctx);
+            Draw_Bar(ctx, _Bar, _Bar.Get_x_pos(), _Bar.Get_y_pos());
+            //Draw_Ball(ctx, _Ball, _Ball.Get_x_pos(), _Ball.Get_y_pos());
+
+            
+            _Ball.Move_interval(10, 0);
+        }
 	</script>
 </head>
 
@@ -133,14 +145,8 @@
 
         const ctx = canvas.getContext("2d");
 
-		let _Bar = new Bar(960,800,70,10);
+		let _Bar = new Bar(960, 800, 70, 10);
 		let _Ball = new Ball(960, 800-10, 7, 10, 30);
-
-
-        Draw_Blocks(ctx);
-
-        Draw_Bar(ctx, _Bar, _Bar.Get_x_pos(), _Bar.Get_y_pos());
-        Draw_Ball(ctx, _Ball, _Ball.Get_x_pos(), _Ball.Get_y_pos());
 
 		window.addEventListener("keydown" , (e) => {
 				if(e.key == "ArrowRight"){
@@ -151,7 +157,7 @@
 				}
 		});
 
-        let timer=setInterval(function() { _Ball.Move_interval(10, 0) }, 100);
+        let timer=setInterval(function () {Update(ctx, _Bar, _Ball)}, 100);
         
     </script>
 </body>
