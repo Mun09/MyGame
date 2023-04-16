@@ -13,6 +13,54 @@
 	</style>
 
 	<script>
+        let BlockArray = Set_Blocks();
+        
+        function Rad(theta){
+            let _rad=theta * Math.PI / 180;
+
+            return _rad;
+        }
+
+        class Block {
+            constructor(x_pos, y_pos, w, h, interval, broke){
+                this.x_pos= x_pos;
+                this.y_pos=y_pos;
+                this.w=w;
+                this.h=h;
+                this.interval=interval;
+                this.broke=broke;
+            }
+            Get_x_pos(){
+                return this.x_pos;
+            }
+            Get_y_pos(){
+                return this.y_pos;
+            }
+            Get_width(){
+                return this.w;
+            }
+            Get_height(){
+                return this.h;
+            }
+            Get_interval(){
+                return this.interval;
+            }
+            is_Broke(){
+                return this.broke;
+            }
+
+            Set_x_pos(x){
+                 this.x_pos=x;
+            }
+            Set_y_pos(y){
+                 this.y_pos=y;
+            }
+            Set_Broke(b){
+                 this.broke=b;
+            }
+th
+        }
+
         class Ball {
             constructor(x_pos, y_pos, r, speed, theta) {
 				this.x_pos=x_pos;
@@ -30,19 +78,28 @@
             Get_r() {
                 return this.r;
             }
+            Get_speed() {
+                return this.speed;
+            }
+            Get_theta() {
+                return this.theta;
+            }
             Set_x_pos(x) {
                 this.x_pos=x;
             }
             Set_y_pos(y) {
                 this.y_pos=y;
             }
-            Move_interval(interval_x, interval_y) {
-                
-                Clear_Ball(ctx, _Ball, _Ball.Get_x_pos(), _Ball.Get_y_pos());
-				_Ball.Set_x_pos(_Ball.Get_x_pos()+interval_x);
-                _Ball.Set_y_pos(_Ball.Get_y_pos()+interval_y);
-                Draw_Ball(ctx, _Ball, _Ball.Get_x_pos(), _Ball.Get_y_pos());
+            Move_Ball(speed, theta, _Bar) {
+                let rad = Rad(theta);
+                let interval_x = -speed * Math.cos(rad);
+                let interval_y = -speed * Math.sin(rad);
+                this.Set_x_pos(this.Get_x_pos() + interval_x);
+                this.Set_y_pos(this.Get_y_pos() + interval_y);
 
+                if(IsCollided_Bar(this, _Bar)) {
+                    this.theta = 180 - this.theta;
+                }
             }
         }
 
@@ -71,27 +128,28 @@
 			Set_y_pos(y){
 				this.y_pos=y;
 			}
-            Move_interval(interval) {
-                Clear_Bar(ctx, _Bar, _Bar.Get_x_pos(), _Bar.Get_y_pos());
-				_Bar.Set_x_pos(_Bar.Get_x_pos()+interval);
-                Draw_Bar(ctx, _Bar, _Bar.Get_x_pos(), _Bar.Get_y_pos());
+            Move_Bar(interval) {
+               _Bar.Set_x_pos(_Bar.Get_x_pos()+interval);
             }
 		}
-        
-		function Draw_Blocks(Rect){
-			let w=40;
-        	let h=40;
-            let interval=10;
-            let init_x=(1920/2)-100;
-            let init_y=100;
-            let frame_w=1920;
-            let frame_h=1080;
 
-            ctx.strokeRect(0, 0, frame_w, frame_h);
+        function Set_Blocks(){
+            let _Block = new Block((1920/2)-100, 100, 40, 40, 10, false);
+
+           for(let i=0; i<10; i++){
+            for(let j=0; j<5; j++){
+                _Block.Set_x_pos();
+                _Block.Set_y_pos();
+            }
+           }
+        }
         
-            ctx.fillStyle="#662410";
-			
-			for(let i=0; i<10; i++){
+        function Draw_Bar(Rect,Bar, x ,y) {
+            Rect.fillRect(x, y,Bar.Get_w(), Bar.Get_h());
+		}
+
+        function Draw_Blocks(Rect) {
+            for(let i=0; i<10; i++){
                 for(let j=0; j<5; j++){
                     
                     let x=init_x+((interval + w)*j);
@@ -101,39 +159,58 @@
                 }
             }
 		}
-
-		function Draw_Bar(Rect,Bar, x ,y){
-            Rect.fillRect(x, y,Bar.Get_w(), Bar.Get_h());
-		}
-		function Clear_Bar(Rect,Bar, x ,y){
-            Rect.clearRect(x, y,Bar.Get_w(), Bar.Get_h());
-		}
-
-        function Draw_Ball(ctx, _Ball, x, y) {
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.arc(x, y, _Ball.Get_r(), 0, 2 * Math.PI);
+        
+        function Draw_Ball(ctx, _Ball) {
+            ctx.beginPath();
+            ctx.arc(_Ball.Get_x_pos(), _Ball.Get_y_pos(), _Ball.Get_r(), 0, 2 * Math.PI);
             ctx.fillStyle = "black";
             ctx.fill();
-        }
-        function Clear_Ball(ctx, _Ball, x, y) {
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.arc(x, y, _Ball.Get_r(), 0, Math.PI * 2, true);
-            ctx.fillStyle="red";
-            ctx.fill();
-        }
-        function Clear(ctx){
-            ctx.clearRect(0, 0, 1920, 1080);
+            ctx.closePath();
         }
 
-        function Update(ctx,_Bar,_Ball){
-            Clear(ctx);
+        function IsCollided_Bar(_Ball, _Bar) {
+            let Ball_x = _Ball.Get_x_pos(), Ball_y = _Ball.Get_y_pos();
+            let Ball_r = _Ball.Get_r();
+            let Bar_x = _Bar.Get_x_pos(), Bar_y = _Bar.Get_y_pos();
+            let Bar_h = _Bar.Get_h(), Bar_w = _Bar.Get_w();
             
+            let dx = Math.abs(Bar_x - Ball_x);
+            let dy = Math.abs(Bar_y - Ball_y);
+            let limitX = Bar_h / 2 + Ball_r;
+            let limitY = Bar_w / 2;
+
+            if(limitX < dx && limitY < dy) return true;
+            return false;
+        }
+
+        function IsCollided_Block(_Ball){
+
+        }
+
+        function Clear(ctx){
+            ctx.fillStyle="white";
+            ctx.fillRect(0, 0, 1920, 1080);
+        }
+
+        function Update(_Bar, _Ball){
+            _Ball.Move_Ball(_Ball.Get_speed(), _Ball.Get_theta(), _Bar);
+        }
+
+        function Render(canvas,ctx,_Bar,_Ball){
+            Clear(ctx);
+
             Draw_Blocks(ctx);
             Draw_Bar(ctx, _Bar, _Bar.Get_x_pos(), _Bar.Get_y_pos());
-            //Draw_Ball(ctx, _Ball, _Ball.Get_x_pos(), _Ball.Get_y_pos());
+            Draw_Ball(ctx, _Ball);
+        }
 
+        function Progress(canvas,ctx,_Bar,_Ball){
+            Update(_Bar, _Ball);
+            Render(canvas, ctx, _Bar, _Ball);
+        }
+
+        function Init(ctx) {
             
-            _Ball.Move_interval(10, 0);
         }
 	</script>
 </head>
@@ -146,18 +223,19 @@
         const ctx = canvas.getContext("2d");
 
 		let _Bar = new Bar(960, 800, 70, 10);
-		let _Ball = new Ball(960, 800-10, 7, 10, 30);
+		let _Ball = new Ball(960, 800-10, 7, 10, 90);
 
 		window.addEventListener("keydown" , (e) => {
-				if(e.key == "ArrowRight"){
-                    _Bar.Move_interval(10);
+
+                if(e.key == "ArrowRight"){
+                    _Bar.Move_Bar(10);
 				}
 				if(e.key == "ArrowLeft"){
-                    _Bar.Move_interval(-10);
+                    _Bar.Move_Bar(-10);
 				}
 		});
 
-        let timer=setInterval(function () {Update(ctx, _Bar, _Ball)}, 100);
+        setInterval(function () {Progress(canvas,ctx, _Bar, _Ball)}, 100);
         
     </script>
 </body>
