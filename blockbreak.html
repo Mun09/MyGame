@@ -10,13 +10,17 @@
 			height: 100%;
 			overflow: hidden;
 		}
+        #myCanvas{
+            border: 1px solid black;
+        }
 	</style>
 
 	<script>
+        let height=10, width=5;
+
         
         function Rad(theta){
             let _rad=theta * Math.PI / 180;
-
             return _rad;
         }
 
@@ -30,19 +34,6 @@
                 this.x2 = init_x + w;
                 this.y2 = init_y + h;
             }
-
-            Get_x1(){
-                return this.x1;
-            }
-            Get_y1(){
-                return this.y1;
-            }
-            Get_x2(){
-                return this.x2;
-            }
-            Get_y2(){
-                return this.y2;
-            }
         }
 
         class Block {
@@ -54,35 +45,6 @@
                 this.interval=interval;
                 this.broke=broke;
             }
-            Get_x_pos(){
-                return this.x_pos;
-            }
-            Get_y_pos(){
-                return this.y_pos;
-            }
-            Get_w(){
-                return this.w;
-            }
-            Get_h(){
-                return this.h;
-            }
-            Get_interval(){
-                return this.interval;
-            }
-            is_Broke(){
-                return this.broke;
-            }
-
-            Set_x_pos(x){
-                 this.x_pos=x;
-            }
-            Set_y_pos(y){
-                 this.y_pos=y;
-            }
-            Set_Broke(b){
-                 this.broke=b;
-            }
-
         }
 
         class Ball {
@@ -93,41 +55,13 @@
                 this.speed=speed;
                 this.theta=theta;
             }
-            Get_x_pos() {
-                return this.x_pos;
-            }
-            Get_y_pos() {
-                return this.y_pos;
-            }
-            Get_r() {
-                return this.r;
-            }
-            Get_speed() {
-                return this.speed;
-            }
-            Get_theta() {
-                return this.theta;
-            }
-            Set_x_pos(x) {
-                this.x_pos=x;
-            }
-            Set_y_pos(y) {
-                this.y_pos=y;
-            }
-            Set_Speed(_speed){
-                this.speed=_speed;
-            }
 
             Move_Ball(speed, theta, _Bar) {
                 let rad = Rad(theta);
-                let interval_x = -speed * Math.cos(rad) * 0.01;
-                let interval_y = -speed * Math.sin(rad) * 0.01;
-                this.Set_x_pos(this.Get_x_pos() + interval_x);
-                this.Set_y_pos(this.Get_y_pos() + interval_y);
-
-                if(IsCollided_Bar(this, _Bar)) {
-                    this.theta = 180 - this.theta;
-                }
+                let interval_x = speed * Math.sin(rad) * 0.01;
+                let interval_y = -speed * Math.cos(rad) * 0.01;
+                this.x_pos=this.x_pos+interval_x;
+                this.y_pos=this.y_pos+interval_y;
             }
         }
 
@@ -138,26 +72,9 @@
 				this.w=w;
 				this.h=h;
 			}
-			Get_x_pos(){
-				return this.x_pos
-			}
-			Get_y_pos(){
-				return this.y_pos;
-			}
-			Get_w(){
-				return this.w;
-			}
-			Get_h(){
-				return this.h;
-			}
-			Set_x_pos(x){
-				this.x_pos=x;
-			}
-			Set_y_pos(y){
-				this.y_pos=y;
-			}
+			
             Move_Bar(interval) {
-               _Bar.Set_x_pos(_Bar.Get_x_pos()+interval);
+                this.x_pos = this.x_pos + interval;
             }
 		}
 
@@ -170,18 +87,16 @@
         }
 
         function Set_Blocks(){
-            let height = 10, width = 5;
             let Blocks=create2DArray(height, width);
 
            for(let i=0; i<height; i++){
                 for(let j=0; j<width; j++){
                     let _Block = new Block((1920/2)-100, 100, 40, 40, 10, false); // x, y, w, h, interval, broke
-                    let init_x=_Block.Get_x_pos();
-                    let init_y=_Block.Get_y_pos();
+                    let init_x=(1920/2)-100;
+                    let init_y=100;
 
-                    _Block.Set_x_pos(init_x + (_Block.Get_interval()+_Block.Get_w()) * j);
-                    _Block.Set_y_pos(init_y + (_Block.Get_interval()+_Block.Get_h()) * i);
-
+                    _Block.x_pos = init_x + (_Block.interval+_Block.w) * j;
+                    _Block.y_pos = init_y + (_Block.interval + _Block.h) * i;
                     Blocks[i][j] = _Block;
                 }
            }
@@ -190,7 +105,7 @@
         }
         
         function Draw_Bar(Rect,Bar, x ,y) {
-            Rect.fillRect(x, y, Bar.Get_w(), Bar.Get_h());
+            Rect.fillRect(x, y, Bar.w, Bar.h);
 		}
 
         function Draw_Blocks(Rect, _Blocks) {
@@ -198,69 +113,105 @@
 
             for(let i=0; i<_Blocks.length; i++){
                 for(let j=0; j<_Blocks[i].length; j++) {
-                    Rect.fillRect(_Blocks[i][j].Get_x_pos(), _Blocks[i][j].Get_y_pos(), _Blocks[i][j].Get_w(), _Blocks[i][j].Get_h());
+                    if(_Blocks[i][j].broke === false) {
+                        Rect.fillRect(_Blocks[i][j].x_pos, _Blocks[i][j].y_pos, _Blocks[i][j].w, _Blocks[i][j].h);
+                    }
                 }
             }
 		}
         
         function Draw_Ball(ctx, _Ball) {
             ctx.beginPath();
-            ctx.arc(_Ball.Get_x_pos(), _Ball.Get_y_pos(), _Ball.Get_r(), 0, 2 * Math.PI);
+            ctx.arc(_Ball.x_pos, _Ball.y_pos, _Ball.r, 0, 2 * Math.PI);
             ctx.fillStyle = "black";
             ctx.fill();
             ctx.closePath();
         }
 
-        function IsCollided_Bar(_Ball, _Bar) {
-            let Ball_x = _Ball.Get_x_pos(), Ball_y = _Ball.Get_y_pos();
-            let Ball_r = _Ball.Get_r();
-            let Bar_x = _Bar.Get_x_pos(), Bar_y = _Bar.Get_y_pos();
-            let Bar_h = _Bar.Get_h(), Bar_w = _Bar.Get_w();
-            
-            let dx = Math.abs(Bar_x - Ball_x);
-            let dy = Math.abs(Bar_y - Ball_y);
-            let limitX = Bar_h / 2 + Ball_r;
-            let limitY = Bar_w / 2;
+        function Draw_Frame(ctx) {
+            let leftx = 1920/2 - 100 - 10;
+            let rightx = 1920/2 + 150;
+            let uppery = 100 - 10;
+            let lowery = 850;
 
-            if(limitX < dx && limitY < dy) return true;
-            return false;
+            ctx.beginPath();
+            ctx.moveTo(leftx, uppery);
+            ctx.lineTo(rightx, uppery);
+            ctx.lineTo(rightx, lowery);
+            ctx.lineTo(leftx, lowery);
+            ctx.lineTo(leftx, uppery);
+            ctx.stroke();
+        }
+
+        function IsCollided_Bar(_Ball, _Bar) {
+            let Ball_x = _Ball.x_pos, Ball_y = _Ball.y_pos;
+            let Ball_r = _Ball.r;
+            let Bar_x = _Bar.x_pos, Bar_y = _Bar.y_pos;
+            let Bar_h = _Bar.h, Bar_w = _Bar.w;
+            
+            let dx = Math.abs(Bar_x + Bar_w/2 - Ball_x);
+            let dy = Math.abs(Bar_y + Bar_h/2 - Ball_y);
+            let limitX = Bar_w / 2 + Ball_r;
+            let limitY = Bar_h / 2 + Ball_r;
+
+            if(limitX > dx && limitY > dy) {
+                if(Bar_x_ok === true) { // 옆에 부딪힘
+                    return 2;
+                } else { // 위아래 부딪힘.
+                    return 1;
+                }
+            } else {
+                Bar_x_ok = limitX>dx ? false : true;
+                Bar_y_ok = limitY>dy ? false : true;
+                return false;
+            }
         }
 
         // Ball이 해당 Block에 부딪치면 true를 반환, 부딪히지 않으면 false를 반환한다.
         function IsCollided_Block(_Ball, _Blocks, index_x, index_y) {
-            let thisBlock = _Blocks[index_x][index_y];
-            let x_length = Math.abs(_Ball.Get_x_pos() - thisBlock.Get_x_pos());
-            let y_length = Math.abs(_Ball.Get_y_pos() - thisBlock.Get_y_pos());
+            let thisBlock = _Blocks[index_y][index_x];
+            if(thisBlock.broke === true) return false;
 
-            let x_Max = _Ball.Get_r() + (thisBlock.Get_w() / 2);
-            let y_Max = _Ball.Get_r() + (thisBlock.Get_h() / 2);
+            let x_length = Math.abs(_Ball.x_pos - (thisBlock.x_pos + thisBlock.w/2));
+            let y_length = Math.abs(_Ball.y_pos - (thisBlock.y_pos + thisBlock.h/2));
+
+            let x_Max = _Ball.r + (thisBlock.w / 2);
+            let y_Max = _Ball.r + (thisBlock.h / 2);
 
             if(x_length < x_Max && y_length < y_Max){
-            return true;
+                thisBlock.broke=true;
+                if(x_length > y_length) {
+                    return 2; // 옆에 부딪힘
+                } else {
+                    return 1; // 위아래 부딪힘
+                }
             } else {
-            return false;
+                return false;
             }
         }
 
         function IndexOfBall(_Ball, height, width) {
             let x = _Ball.x_pos, y = _Ball.y_pos;
-            console.log(x, y);
             let i=0, j=0;
+            let i_limit = height  + 10; // 20
+            let j_limit = width + 5; // 10
 
-            if(y < 100) return [-1, 99];
-            for(i=0; i<height; i++) {
+            // if(y > 100 + 50 + 50 * 10) return [0, 99];
+            if(y < 100) return [1, 99];
+            for(i=0; i<i_limit; i++) {
                 if(y < (100 + 50 + 50 * i)) {
                     break;
                 }
             }
 
-            if(x < (1920/2 -100) || x > (1920/2 -100 + 50 * 5)) return [99, -1]; 
-            for(j=0; j<height; j++) {
+            if(x < 1920/2 - 100 - 10 + _Ball.r) return [99, 2];
+            if(x > 1920/2 + 150 - _Ball.r) return [99, 3]; 
+            for(j=0; j<j_limit; j++) {
                 if(x < ((1920/2 - 100) + 50 + 50 * j)) {
                     break;
                 }
             }
-
+            console.log(i,j);
             return [i, j];
         }
 
@@ -270,34 +221,60 @@
         }
 
         function Update(_Bar, _Ball, Blocks){
-            _Ball.Move_Ball(_Ball.Get_speed(), _Ball.Get_theta(), _Bar);
+            _Ball.Move_Ball(_Ball.speed, _Ball.theta, _Bar);
 
             let height = 10, width = 5;
             let [Ball_index_y, Ball_index_x] = IndexOfBall(_Ball, height, width);
-            if(Ball_index_y < 0) return; // y 범위 초과
-            if(Ball_index_x < 0) return; // x 범위 초과
+            let c = Math.max(Ball_index_x, Ball_index_y);
+            if(c == 99) {
+                Change_Theta(_Ball, Math.min(Ball_index_x, Ball_index_y));
+                return;
+            }
 
-            let arr1 = [1, -1, 0, 0], arr2=[0, 0, 1, -1];
+            let arr1 = [1, -1, 0, 0, 0], arr2=[0, 0, 1, -1, 0];
 
-            for(let i=0; i<4; i++) {
-                let tmpx = arr1[i] + Ball_index_x, tmpy = arr2[i] + Ball_index_y;
+            for(let i=0; i<5; i++) {
+                let tmpy = arr1[i] + Ball_index_y, tmpx = arr2[i] + Ball_index_x; 
                 if(tmpx >=0 && tmpx < width && tmpy >= 0 && tmpy < height) {
-                    if(IsCollided_Block(_Ball, Blocks, tmpx, tmpy)) {
-                        _Ball.speed = -200;
+                    if(c = IsCollided_Block(_Ball, Blocks, tmpx, tmpy)) {
+                        // console.log(Ball_index_y, Ball_index_x, tmpy, tmpx);
+                        Change_Theta(_Ball, c);
                         return;
                     }
                 }
             }
 
-            //IsCollided_Block(_Ball, Blocks);
+            if(c=IsCollided_Bar(_Ball, _Bar)) {
+                Change_Theta(_Ball, c);
+                return;
+            }
+
+
+        }
+
+        function Change_Theta(_Ball, i) {
+            switch(i) {
+                case 0: // down
+                case 1: // upper
+                    _Ball.theta = 180 - _Ball.theta;
+                    break;
+                case 2: // right
+                case 3: // left
+                    _Ball.theta = -_Ball.theta;
+                    break;
+            }
         }
 
         function Render(ctx, _Bar, _Ball, _Blocks){
             Clear(ctx);
 
+            Draw_Frame(ctx);
             Draw_Blocks(ctx, _Blocks);
-            Draw_Bar(ctx, _Bar, _Bar.Get_x_pos(), _Bar.Get_y_pos());
+            Draw_Bar(ctx, _Bar, _Bar.x_pos, _Bar.y_pos);
             Draw_Ball(ctx, _Ball);
+            if(_Ball.y_pos > 850) {
+                GameOver(ctx);
+            }
         }
 
         function Progress(ctx, _Bar, _Ball, _Blocks){
@@ -305,8 +282,33 @@
             Render(ctx, _Bar, _Ball, _Blocks);
         }
 
-        function Init(ctx) {
+        function SettingUpParameters() {
+            height = 10, width=5;
+            Bar_x_ok = true, Bar_y_ok = true;
+        }
+
+        function GameOver(ctx) {
             
+            
+        }
+
+        function Init(ctx) {
+            let _Bar = new Bar(960, 800, 70, 10);
+            let _Ball = new Ball(960, 800-10, 7, 200, 80);
+            let BlockArray = Set_Blocks();
+            SettingUpParameters();
+
+            window.addEventListener("keydown" , (e) => {
+
+                    if(e.key == "ArrowRight"){
+                        _Bar.Move_Bar(10);
+                    }
+                    if(e.key == "ArrowLeft"){
+                        _Bar.Move_Bar(-10);
+                    }
+            });
+
+            setInterval(function () {Progress(ctx, _Bar, _Ball, BlockArray)}, 10);
         }
 	</script>
 </head>
@@ -315,25 +317,8 @@
     <canvas id="myCanvas" width="1920" height="1080"></canvas>
     <script>
         const canvas = document.getElementById("myCanvas");
-
         const ctx = canvas.getContext("2d");
-
-		let _Bar = new Bar(960, 800, 70, 10);
-		let _Ball = new Ball(960, 800-10, 7, 200, 90);
-        let BlockArray = Set_Blocks();
-
-		window.addEventListener("keydown" , (e) => {
-
-                if(e.key == "ArrowRight"){
-                    _Bar.Move_Bar(10);
-				}
-				if(e.key == "ArrowLeft"){
-                    _Bar.Move_Bar(-10);
-				}
-		});
-
-        setInterval(function () {Progress(ctx, _Bar, _Ball, BlockArray)}, 10);
-        
+        Init(ctx);
     </script>
 </body>
 </html>
